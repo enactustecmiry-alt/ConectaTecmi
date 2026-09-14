@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="InterTec — Comunidad estudiantil nacional de ConectaTec." />
+  <title>InterTec · ConectaTec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Saltar al contenido</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">IT</div>
+        <div>
+          <div class="brand-name">InterTec</div>
+          <div class="brand-sub">ConectaTec · Comunidad</div>
+        </div>
+      </div>
+
+      <div class="sidebar-note sticker tilt-left">
+        <span class="sticker-label">MULTICAMPUS</span>
+        <strong>Una red.<br>Muchas ciudades.</strong>
+      </div>
+
+      <nav class="primary-nav" role="tablist" aria-label="Apartados de InterTec">
+        <button class="nav-item is-active" role="tab" aria-selected="true" aria-controls="panel-classes" id="tab-classes" data-tab="classes">
+          <span class="nav-icon" aria-hidden="true">01</span>
+          <span><strong>Mis Clases</strong><small>Aulas Vivas</small></span>
+        </button>
+        <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-profile" id="tab-profile" data-tab="profile">
+          <span class="nav-icon" aria-hidden="true">02</span>
+          <span><strong>Mi Perfil</strong><small>Quién soy aquí</small></span>
+        </button>
+        <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-fraternity" id="tab-fraternity" data-tab="fraternity">
+          <span class="nav-icon" aria-hidden="true">03</span>
+          <span><strong>Mi Fraternidad</strong><small>Encuentra tu tribu</small></span>
+        </button>
+        <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-community" id="tab-community" data-tab="community">
+          <span class="nav-icon" aria-hidden="true">04</span>
+          <span><strong>Comunidad</strong><small>Conecta con otros</small></span>
+        </button>
+        <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-fraternity-qualifier" id="tab-fraternity-qualifier" data-tab="fraternity-qualifier">
+          <span class="nav-icon" aria-hidden="true">05</span>
+          <span><strong>Clasificatoria</strong><small>Fraternidades</small></span>
+        </button>
+        <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-campus-qualifier" id="tab-campus-qualifier" data-tab="campus-qualifier">
+          <span class="nav-icon" aria-hidden="true">06</span>
+          <span><strong>Clasificatoria</strong><small>Intracampus</small></span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="mini-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Comunidad activa</span>
+        </div>
+        <span class="version">Prototype · v1.0</span>
+      </div>
+    </aside>
+
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <p class="eyebrow" id="sectionEyebrow">AULAS VIVAS</p>
+          <h1 id="sectionTitle">Mis Clases</h1>
+        </div>
+        <div class="topbar-meta">
+          <div class="date-badge">
+            <span class="date-dot"></span>
+            <span id="todayLabel">Hoy</span>
+          </div>
+          <div class="student-badge" id="studentBadge" aria-live="polite">
+            <span class="avatar avatar-sm" id="headerAvatar">IT</span>
+            <span id="headerStudentName">Invitado</span>
+          </div>
+        </div>
+      </header>
+
+      <main id="mainContent">
+        <section id="panel-classes" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-classes" tabindex="0">
+          <div class="hero-grid">
+            <div class="hero-block dark-block">
+              <div class="hero-kicker">
+                <span class="live-pill"><span class="live-pulse"></span> EN VIVO AHORA</span>
+                <span class="micro-label">MULTICAMPUS</span>
+              </div>
+              <h2>La clase no termina<br>cuando cambia la ciudad.</h2>
+              <p>Conecta con estudiantes de tu mismo programa, desde Reynosa hasta Monterrey, Culiacán y más.</p>
+              <div class="hero-spark" aria-hidden="true">✦</div>
+            </div>
+
+            <div class="hero-block countdown-block">
+              <span class="countdown-label">PRÓXIMA CLASE</span>
+              <strong id="nextClassCountdown" class="countdown-value">--:--:--</strong>
+              <div class="countdown-copy" id="nextClassName">Programación Orientada a Objetos</div>
+              <div class="countdown-meta">Hoy · 6:00pm</div>
+            </div>
+          </div>
+
+          <div class="section-intro">
+            <div>
+              <p class="eyebrow">AGENDA MULTICAMPUS</p>
+              <h2>Mis próximas clases</h2>
+            </div>
+            <div class="legend">
+              <span class="legend-item"><span class="legend-dot live"></span> En vivo</span>
+              <span class="legend-item"><span class="legend-dot"></span> Próxima</span>
+            </div>
+          </div>
+
+          <div id="classesGrid" class="card-grid classes-grid"></div>
+          <div id="classChats"></div>
+        </section>
+
+        <section id="panel-profile" class="tab-panel" role="tabpanel" aria-labelledby="tab-profile" tabindex="0" hidden>
+          <div id="profileView"></div>
+        </section>
+
+        <section id="panel-fraternity" class="tab-panel" role="tabpanel" aria-labelledby="tab-fraternity" tabindex="0" hidden>
+          <div id="fraternityView"></div>
+        </section>
+
+        <section id="panel-community" class="tab-panel" role="tabpanel" aria-labelledby="tab-community" tabindex="0" hidden>
+          <div id="communityView"></div>
+        </section>
+
+        <section id="panel-fraternity-qualifier" class="tab-panel" role="tabpanel" aria-labelledby="tab-fraternity-qualifier" tabindex="0" hidden>
+          <div id="fraternityQualifierView"></div>
+        </section>
+
+        <section id="panel-campus-qualifier" class="tab-panel" role="tabpanel" aria-labelledby="tab-campus-qualifier" tabindex="0" hidden>
+          <div id="campusQualifierView"></div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <span>InterTec · ConectaTec</span>
+        <span>Comunidad estudiantil nacional</span>
+      </footer>
+    </div>
+  </div>
+
+  <nav class="mobile-tabs" aria-label="Navegación móvil" role="tablist">
+    <button class="mobile-tab is-active" role="tab" aria-selected="true" data-tab="classes">
+      <span class="mobile-tab-icon">01</span><span>Clases</span>
+    </button>
+    <button class="mobile-tab" role="tab" aria-selected="false" data-tab="profile">
+      <span class="mobile-tab-icon">02</span><span>Perfil</span>
+    </button>
+    <button class="mobile-tab" role="tab" aria-selected="false" data-tab="fraternity">
+      <span class="mobile-tab-icon">03</span><span>Fraternidad</span>
+    </button>
+    <button class="mobile-tab" role="tab" aria-selected="false" data-tab="community">
+      <span class="mobile-tab-icon">04</span><span>Comunidad</span>
+    </button>
+    <button class="mobile-tab" role="tab" aria-selected="false" data-tab="fraternity-qualifier">
+      <span class="mobile-tab-icon">05</span><span>Retos</span>
+    </button>
+    <button class="mobile-tab" role="tab" aria-selected="false" data-tab="campus-qualifier">
+      <span class="mobile-tab-icon">06</span><span>Proyectos</span>
+    </button>
+  </nav>
+
+  <!-- Gather modal -->
+  <div id="gatherModal" class="modal-backdrop" hidden>
+    <div class="modal-card gather-card" role="dialog" aria-modal="true" aria-labelledby="gatherTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">×</button>
+      <div class="modal-illustration">
+        <div class="scan-ring"></div>
+        <div class="gather-mark">G</div>
+      </div>
+      <p class="eyebrow">AULA VIVA</p>
+      <h2 id="gatherTitle">Conectando a Gather...</h2>
+      <p id="gatherText">Preparando tu espacio inmersivo.</p>
+      <div class="loader-bar"><span id="gatherLoader"></span></div>
+      <div class="connected-badge" id="connectedBadge" hidden>✓ Conectado al aula</div>
+      <button class="button primary" id="gatherDone" hidden>Entrar al aula</button>
+    </div>
+  </div>
+
+  <!-- Create chat modal -->
+  <div id="chatCreateModal" class="modal-backdrop" hidden>
+    <div class="modal-card chat-create-card" role="dialog" aria-modal="true" aria-labelledby="chatCreateTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">×</button>
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">NUEVO CHAT</p>
+          <h2 id="chatCreateTitle">Crea un espacio para tu equipo.</h2>
+          <p class="modal-sub">Arma un chat de proyecto, estudio, reto o cualquier tema que quieras llevar con tu comunidad.</p>
+        </div>
+      </div>
+      <form id="chatCreateForm" class="chat-create-form" novalidate>
+        <label class="field-label" for="chatNameInput">Nombre del chat</label>
+        <input class="text-input" id="chatNameInput" maxlength="48" placeholder="Ej. Equipo Termika" required />
+
+        <label class="field-label" for="chatClassInput">Relacionado con</label>
+        <select class="select-input chat-create-select" id="chatClassInput">
+          <option value="General">General · Comunidad InterTec</option>
+        </select>
+
+        <label class="field-label" for="chatDescriptionInput">Descripción <span class="field-helper">opcional</span></label>
+        <textarea class="chat-textarea" id="chatDescriptionInput" rows="4" maxlength="120" placeholder="¿Para qué se usarán este chat?"></textarea>
+
+        <p class="form-error" id="chatCreateError" role="alert"></p>
+        <div class="form-actions">
+          <button class="button subtle" type="button" data-close-modal>Cancelar</button>
+          <button class="button primary" type="submit">Crear chat ✦</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile modal -->
+  <div id="profileModal" class="modal-backdrop" hidden>
+    <div class="modal-card profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Cerrar">×</button>
+
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">NUEVO PERFIL</p>
+          <h2 id="profileModalTitle">Construyamos tu ficha.</h2>
+          <p class="modal-sub">Tu perfil alimenta el matching con otras personas del ecosistema multicampus.</p>
+        </div>
+        <div class="step-counter"><span id="currentStep">1</span>/3</div>
+      </div>
+
+      <div class="progress-track" aria-label="Progreso del formulario">
+        <span id="progressBar"></span>
+      </div>
+
+      <form id="profileForm" novalidate>
+        <div class="form-step is-active" data-step="1">
+          <div class="step-heading">
+            <span class="step-kicker">01 · IDENTIDAD</span>
+            <h3>¿Cómo te reconoce la comunidad?</h3>
+          </div>
+
+          <label class="field-label" for="nameInput">Nombre</label>
+          <input class="text-input" id="nameInput" name="name" autocomplete="name" placeholder="Escribe tu nombre" />
+
+          <fieldset class="chip-fieldset">
+            <legend>Campus <span class="field-helper">selección múltiple</span></legend>
+            <div class="chip-grid" id="campusChips"></div>
+          </fieldset>
+
+          <fieldset class="chip-fieldset">
+            <legend>Carrera <span class="field-helper">selección múltiple</span></legend>
+            <div class="chip-grid" id="careerChips"></div>
+          </fieldset>
+
+          <p class="form-error" id="step1Error" role="alert"></p>
+        </div>
+
+        <div class="form-step" data-step="2">
+          <div class="step-heading">
+            <span class="step-kicker">02 · AFINIDADES</span>
+            <h3>Lo que te mueve también conecta.</h3>
+          </div>
+
+          <fieldset class="chip-fieldset">
+            <legend>Certificado <span class="field-helper">elige uno</span></legend>
+            <div class="chip-grid" id="certificateChips"></div>
+          </fieldset>
+
+          <fieldset class="chip-fieldset">
+            <legend>Gustos <span class="field-helper">selección múltiple</span></legend>
+            <div class="chip-grid" id="interestChips"></div>
+          </fieldset>
+
+          <fieldset class="chip-fieldset">
+            <legend>Grupos estudiantiles <span class="field-helper">selección múltiple</span></legend>
+            <div class="chip-grid" id="groupChips"></div>
+          </fieldset>
+
+          <p class="form-error" id="step2Error" role="alert"></p>
+        </div>
+
+        <div class="form-step" data-step="3">
+          <div class="step-heading">
+            <span class="step-kicker">03 · TU RITMO</span>
+            <h3>¿Qué tipo de reto te prende?</h3>
+          </div>
+
+          <fieldset class="chip-fieldset">
+            <legend>Preferencia de retos <span class="field-helper">elige uno</span></legend>
+            <div class="challenge-grid" id="challengeChips"></div>
+          </fieldset>
+
+          <div class="confirmation-box">
+            <div class="confirmation-icon">✦</div>
+            <div>
+              <strong>Listo para hacer comunidad.</strong>
+              <p>Al confirmar, habilitaremos tu matching de fraternidad.</p>
+            </div>
+          </div>
+
+          <p class="form-error" id="step3Error" role="alert"></p>
+        </div>
+
+        <div class="form-actions">
+          <button class="button subtle" type="button" id="prevStep">Atrás</button>
+          <div class="actions-right">
+            <button class="button secondary" type="button" id="nextStep">Continuar</button>
+            <button class="button primary" type="submit" id="saveProfile" hidden>Crear mi perfil</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
