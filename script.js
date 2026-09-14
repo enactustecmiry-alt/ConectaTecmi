@@ -162,7 +162,7 @@
     steps.forEach(([name, fn]) => {
       try { fn(); }
       catch (error) {
-        console.error(`InterTec · módulo ${name}:`, error);
+        console.error(`InterTecmi · módulo ${name}:`, error);
       }
     });
   }
@@ -335,7 +335,7 @@
           <div>
             <p class="eyebrow">CHAT DE CLASE</p>
             <h2>Habla con tu equipo antes, durante y después del aula.</h2>
-            <p>Los grupos pueden nacer desde una clase, un proyecto o una idea. Crea los tuyos y mantén la conversación dentro de InterTec.</p>
+            <p>Los grupos pueden nacer desde una clase, un proyecto o una idea. Crea los tuyos y mantén la conversación dentro de InterTecmi.</p>
           </div>
           <button class="button primary" type="button" id="createChatBtn">+ Crear chat</button>
         </div>
@@ -397,7 +397,7 @@
     $("#chatCreateForm").reset();
     $("#chatCreateError").textContent = "";
     const classSelect = $("#chatClassInput");
-    classSelect.innerHTML = `<option value="General">General · Comunidad InterTec</option>` + classData.map(item => `<option value="${escapeAttr(item.subject)}">${escapeHtml(item.subject)}</option>`).join("");
+    classSelect.innerHTML = `<option value="General">General · Comunidad InterTecmi</option>` + classData.map(item => `<option value="${escapeAttr(item.subject)}">${escapeHtml(item.subject)}</option>`).join("");
     modal.hidden = false;
     document.body.classList.add("modal-open");
     window.setTimeout(() => $("#chatNameInput")?.focus(), 30);
@@ -406,7 +406,7 @@
   function createChat() {
     const name = $("#chatNameInput").value.trim();
     const relatedTo = $("#chatClassInput").value;
-    const description = $("#chatDescriptionInput").value.trim() || "Chat creado desde InterTec para organizar ideas y tareas.";
+    const description = $("#chatDescriptionInput").value.trim() || "Chat creado desde InterTecmi para organizar ideas y tareas.";
     if (!name) {
       $("#chatCreateError").textContent = "Escribe un nombre para el chat.";
       return;
@@ -435,7 +435,7 @@
             <div class="empty-art" aria-hidden="true">IT</div>
             <p class="eyebrow">TU ESPACIO EN LA RED</p>
             <h2>Aquí todavía<br>no hay perfil.</h2>
-            <p>Crea una ficha rápida para que InterTec entienda tu campus, tu carrera y tus afinidades. Después podremos conectarte con tu fraternidad.</p>
+            <p>Crea una ficha rápida para que InterTecmi entienda tu campus, tu carrera y tus afinidades. Después podremos conectarte con tu fraternidad.</p>
             <button class="button primary" type="button" id="createProfileBtn">Crear mi perfil ✦</button>
           </div>
         </div>`;
@@ -669,7 +669,7 @@
       <div class="community-layout">
         <section class="community-hero dark-block">
           <div>
-            <p class="eyebrow" style="color:var(--acid)">RED INTERTEC</p>
+            <p class="eyebrow" style="color:var(--acid)">RED InterTecmi</p>
             <h2>No importa tu campus.<br>Encuentra a tu gente.</h2>
             <p>Descubre estudiantes por intereses, carreras, certificados y ciudades. Conecta primero; la comunidad sucede después.</p>
           </div>
@@ -712,7 +712,7 @@
         </section>
 
         <section class="photo-wall-section">
-          <div class="section-intro"><div><p class="eyebrow">MI GALERÍA</p><h2>Comparte momentos de tu vida InterTec</h2></div><label class="button primary upload-button">+ Añadir fotos<input id="galleryInput" type="file" accept="image/*" multiple hidden></label></div>
+          <div class="section-intro"><div><p class="eyebrow">MI GALERÍA</p><h2>Comparte momentos de tu vida InterTecmi</h2></div><label class="button primary upload-button">+ Añadir fotos<input id="galleryInput" type="file" accept="image/*" multiple hidden></label></div>
           <div class="photo-wall" id="photoWall">
             ${galleryPhotos.length ? galleryPhotos.map((src,index)=>`<figure class="user-photo"><img src="${escapeAttr(src)}" alt="Foto de mi galería ${index+1}"><button type="button" class="photo-remove" data-remove-photo="${index}" aria-label="Eliminar foto">×</button></figure>`).join("") : `<div class="photo-empty"><span>✦</span><strong>Tu galería está esperando historias.</strong><p>Sube fotos de clases, proyectos, eventos, viajes o retos multicampus.</p></div>`}
           </div>
@@ -774,7 +774,7 @@
             <div>
               <div class="scanner"><div class="scanner-core">IT</div></div>
               <div class="matching-copy">
-                <p class="eyebrow">ALGORITMO INTERTEC</p>
+                <p class="eyebrow">ALGORITMO InterTecmi</p>
                 <h3>${matchStarted ? "Calculando tu match..." : "Preparando tu match..."}</h3>
                 <p>Conectamos tus señales con perfiles, carreras y campus compatibles.</p>
               </div>
