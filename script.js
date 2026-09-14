@@ -29,7 +29,7 @@
   };
 
   const fraternities = [
-    { name: "Cóndores", color: "#2E6E9E", members: 142, cities: 6, careers: 4, points: 1840, icon: "◒", desc: "Energía de altura, estrategia y comunidad entre campus.", image: "https://images.unsplash.com/photo-1715002383611-63488b956401?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Águila en primer plano" },
+    { name: "Loboses", color: "#2E6E9E", members: 142, cities: 6, careers: 4, points: 1840, icon: "◒", desc: "Energía de altura, estrategia y comunidad entre campus.", image: "https://images.unsplash.com/photo-1715002383611-63488b956401?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Águila en primer plano" },
     { name: "Jaguares", color: "#B8860B", members: 158, cities: 7, careers: 5, points: 1968, icon: "J", desc: "Intensidad, curiosidad y ganas de hacer que pasen cosas.", image: "https://images.unsplash.com/photo-1528238344097-a8994f7c74e4?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Jaguar en primer plano" },
     { name: "Quetzales", color: "#1B7A56", members: 121, cities: 5, careers: 3, points: 1764, icon: "Q", desc: "Creatividad, colaboración y un toque de exploración.", image: "https://images.unsplash.com/photo-1558254588-ee173c5dd703?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Quetzal verde sobre una rama" },
     { name: "Coyotes", color: "#C7451F", members: 137, cities: 6, careers: 4, points: 1821, icon: "C", desc: "Ingenio, adaptabilidad y comunidad que se mueve contigo.", image: "https://images.unsplash.com/photo-1493911324503-e5c8bf9df181?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Coyote caminando en un paisaje árido" },
