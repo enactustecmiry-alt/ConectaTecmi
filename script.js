@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const GATHER_DEFAULT_URL = "https://app.v2.gather.town/app/76400ece-7e37-46b4-b42a-33bfd782d8bb/invite/134174b0-5c9c-47bd-b441-a19a5818b353?copysource=inviteTeamModal";
+  const GATHER_DEFAULT_URL = "https://app.v2.gather.town/app/25e4f4c4-31fa-4e91-8bfa-9241fb67b2f7/invite/b8b2a073-e6de-4f6f-b4a6-a5e68f04ffa7?copysource=inviteTeamModal";
 
   const catalog = {
     campus: [
