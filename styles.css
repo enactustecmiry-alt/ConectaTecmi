@@ -2073,3 +2073,61 @@ fieldset legend {
     overflow-wrap: normal;
   }
 }
+
+
+/* Misiones de fraternidad: nueva sección que sustituye la copa de proyectos */
+.mission-card { overflow:hidden; }
+.mission-illustration { min-height:118px; margin:12px 0 16px; border:2px dashed rgba(16,36,31,.24); border-radius:16px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px; background:linear-gradient(135deg, rgba(200,230,0,.20), rgba(245,183,0,.14)); }
+.mission-illustration span { font-size:2rem; font-weight:900; line-height:1; }
+.mission-illustration small { font-size:.65rem; font-weight:900; letter-spacing:.12em; }
+.mission-illustration.is-video { background:linear-gradient(135deg, rgba(46,110,158,.15), rgba(200,230,0,.22)); }
+.mission-complete { border-color:var(--green); }
+.mission-complete .mission-illustration { border-style:solid; background:rgba(11,122,69,.10); }
+.mission-modal-card { width:min(540px, calc(100vw - 28px)); }
+.mission-upload { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:24px 16px; margin:18px 0 8px; border:2px dashed rgba(16,36,31,.35); border-radius:16px; background:rgba(200,230,0,.09); cursor:pointer; text-align:center; }
+.mission-upload-icon { display:grid; place-items:center; width:42px; height:42px; border:2px solid var(--ink); border-radius:50%; font-size:1.6rem; font-weight:800; }
+.mission-upload small,.mission-demo-note { color:var(--muted); font-size:.75rem; }
+.mission-evidence-name { overflow-wrap:anywhere; font-size:.85rem; font-weight:700; }
+.mission-modal-card .modal-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:18px; }
+
+
+/* Ajustes puntuales v7: avatar de encabezado, chat y enlaces de trends */
+#headerAvatar { flex: 0 0 auto; display: inline-grid; place-items: center; overflow: hidden; position: relative; border-radius: 50%; padding: 0; }
+#headerAvatar .avatar-image { display: block; width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: cover; object-position: center; border-radius: inherit; }
+.student-badge { max-width: 190px; }
+#headerStudentName { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mission-trend-link { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 14px; font-size: .78rem; font-weight: 800; color: var(--ink); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.mission-trend-link:hover { color: var(--green); }
+.chat-messages { scroll-behavior: smooth; }
+@media (max-width: 520px) { .student-badge { max-width: 145px; } #headerStudentName { max-width: 70px; } }
+
+.chat-jump-button { position: relative; z-index: 1; margin-top: 16px; }
+
+/* Acceso inicial por tipo de alumno */
+.app-shell[hidden], .mobile-tabs[hidden], .access-gate[hidden] { display: none !important; }
+.access-gate { min-height:100vh; padding:clamp(20px,5vw,64px); display:grid; place-items:center; background:var(--paper, #F5F3E9); color:var(--ink, #172A26); }
+.access-gate-card { width:min(100%,780px); padding:clamp(24px,5vw,52px); background:#fffdf6; border:3px solid var(--ink-line, #172A26); box-shadow:10px 10px 0 var(--ink, #172A26); }
+.access-brand { display:flex; align-items:center; gap:12px; margin-bottom:38px; font:800 19px/1 Archivo,sans-serif; }
+.access-brand small { display:block; margin-top:4px; color:var(--muted, #65716b); font:600 11px/1.3 Inter,sans-serif; }
+.access-brand .brand-mark { display:grid; place-items:center; width:48px; height:48px; background:var(--acid, #C8E600); border:2px solid var(--ink-line, #172A26); font:800 17px Archivo,sans-serif; }
+.access-gate h1 { max-width:640px; margin:8px 0 12px; font:800 clamp(34px,6vw,58px)/.98 Archivo,sans-serif; letter-spacing:-.045em; text-transform:uppercase; }
+.access-intro { max-width:610px; color:var(--muted, #65716b); line-height:1.65; }
+.access-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:28px 0; }
+.access-choice { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:10px; min-height:190px; padding:20px; border:2px solid var(--ink-line, #172A26); background:var(--paper, #F5F3E9); cursor:pointer; transition:transform .18s ease,box-shadow .18s ease,background .18s ease; }
+.access-choice:has(input:checked) { background:#eef3cb; box-shadow:5px 5px 0 var(--ink, #172A26); transform:translate(-2px,-2px); }
+.access-choice input { position:absolute; top:15px; right:15px; width:18px; height:18px; accent-color:var(--green, #00534C); }
+.access-choice-icon { display:grid; place-items:center; width:44px; height:44px; border:2px solid var(--ink-line, #172A26); border-radius:50%; background:var(--acid, #C8E600); font-size:23px; font-weight:800; }
+.access-choice strong { font:800 18px/1.1 Archivo,sans-serif; text-transform:uppercase; }
+.access-choice small { color:var(--muted, #65716b); font-size:13px; line-height:1.5; }
+.flex-access-fields { display:grid; gap:8px; margin-bottom:20px; }
+.flex-access-fields[hidden] { display:none !important; }
+.flex-access-fields label { margin-top:6px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+.flex-access-fields input,.flex-access-fields select { width:100%; min-height:48px; padding:12px 14px; border:2px solid var(--ink-line, #172A26); border-radius:0; background:white; color:var(--ink, #172A26); font:600 15px Inter,sans-serif; }
+.flex-access-fields input:focus,.flex-access-fields select:focus { outline:3px solid var(--acid, #C8E600); outline-offset:2px; }
+.flex-access-fields small { color:var(--muted, #65716b); font-size:12px; }
+.access-error { padding:10px 12px; border-left:4px solid #c7451f; background:#fff0e9; color:#8d2c13; font-size:13px; font-weight:700; }
+.access-submit { width:100%; min-height:52px; justify-content:center; }
+.access-footnote { margin:18px 0 0; color:var(--muted, #65716b); font-size:11px; line-height:1.5; }
+.access-switch { padding:9px 12px; border:2px solid var(--ink-line, #172A26); background:transparent; color:inherit; font-size:11px; font-weight:800; text-transform:uppercase; cursor:pointer; }
+.hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+@media(max-width:600px) { .access-choice-grid { grid-template-columns:1fr; } .access-choice { min-height:unset; } .access-brand { margin-bottom:28px; } .access-gate-card { box-shadow:6px 6px 0 var(--ink, #172A26); } .access-switch { padding:7px 8px; font-size:9px; } }

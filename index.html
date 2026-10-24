@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="InterTecmi — Comunidad estudiantil nacional de ConectaTecmi." />
-  <title>InterTecmi · ConectaTecmi</title>
+  <meta name="description" content="InterTec — Comunidad estudiantil nacional de ConectaTec." />
+  <title>InterTec · ConectaTec</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,13 +13,51 @@
 <body>
   <a class="skip-link" href="#mainContent">Saltar al contenido</a>
 
-  <div class="app-shell">
+  <section id="accessGate" class="access-gate" aria-labelledby="accessTitle">
+    <div class="access-gate-card">
+      <div class="access-brand"><span class="brand-mark" aria-hidden="true">IT</span><span>InterTec <small>ConectaTec · Comunidad</small></span></div>
+      <p class="eyebrow">ANTES DE ENTRAR</p>
+      <h1 id="accessTitle">¿Cómo estudias en Tecmilenio?</h1>
+      <p class="access-intro">Personaliza tu acceso para encontrar tus aulas y convivir con estudiantes de todos los campus.</p>
+      <div class="access-choice-grid">
+        <label class="access-choice" for="accessFlex">
+          <input id="accessFlex" type="radio" name="studentType" value="flex" checked>
+          <span class="access-choice-icon">↗</span><strong>Soy alumno FLEX</strong>
+          <small>Acceso a tus clases FLEX en Gather y a las salas comunitarias.</small>
+        </label>
+        <label class="access-choice" for="accessRegular">
+          <input id="accessRegular" type="radio" name="studentType" value="regular">
+          <span class="access-choice-icon">◎</span><strong>Soy alumno regular</strong>
+          <small>Acceso a InterTec y a las salas comunitarias de convivencia.</small>
+        </label>
+      </div>
+      <form id="accessForm" novalidate>
+        <div id="flexAccessFields" class="flex-access-fields">
+          <label for="flexClassSelect">Selecciona tu clase FLEX</label>
+          <select id="flexClassSelect" name="flexClass" required>
+            <option value="">Elige una clase</option>
+            <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
+            <option value="Fundamentos de Mercadotecnia">Fundamentos de Mercadotecnia</option>
+            <option value="Anatomía y Fisiología">Anatomía y Fisiología</option>
+          </select>
+          <label for="flexEnrollment">Matrícula</label>
+          <input id="flexEnrollment" name="enrollment" type="text" placeholder="Ej. AL07209922" autocomplete="off" maxlength="10" pattern="[Aa][Ll][0-9]{8}" required>
+          <small>Formato: AL seguido de 8 dígitos.</small>
+        </div>
+        <p id="accessError" class="access-error" role="alert" hidden></p>
+        <button class="button primary access-submit" type="submit">Entrar a InterTec →</button>
+      </form>
+      <p class="access-footnote">Prototipo: la matrícula se valida por formato; la verificación institucional requiere integración con un sistema escolar.</p>
+    </div>
+  </section>
+
+  <div class="app-shell" id="appShell" hidden>
     <aside class="sidebar" aria-label="Navegación principal">
       <div class="brand-lockup">
         <div class="brand-mark" aria-hidden="true">IT</div>
         <div>
-          <div class="brand-name">InterTecmi</div>
-          <div class="brand-sub">ConectaTecmi · Comunidad</div>
+          <div class="brand-name">InterTec</div>
+          <div class="brand-sub">ConectaTec · Comunidad</div>
         </div>
       </div>
 
@@ -28,7 +66,7 @@
         <strong>Una red.<br>Muchas ciudades.</strong>
       </div>
 
-      <nav class="primary-nav" role="tablist" aria-label="Apartados de InterTecmi">
+      <nav class="primary-nav" role="tablist" aria-label="Apartados de InterTec">
         <button class="nav-item is-active" role="tab" aria-selected="true" aria-controls="panel-classes" id="tab-classes" data-tab="classes">
           <span class="nav-icon" aria-hidden="true">01</span>
           <span><strong>Mis Clases</strong><small>Aulas Vivas</small></span>
@@ -51,7 +89,7 @@
         </button>
         <button class="nav-item" role="tab" aria-selected="false" aria-controls="panel-campus-qualifier" id="tab-campus-qualifier" data-tab="campus-qualifier">
           <span class="nav-icon" aria-hidden="true">06</span>
-          <span><strong>Clasificatoria</strong><small>Intracampus</small></span>
+          <span><strong>Misiones</strong><small>Gana puntos</small></span>
         </button>
       </nav>
 
@@ -71,6 +109,7 @@
           <h1 id="sectionTitle">Mis Clases</h1>
         </div>
         <div class="topbar-meta">
+          <button type="button" class="access-switch" id="changeAccessBtn">Cambiar acceso</button>
           <div class="date-badge">
             <span class="date-dot"></span>
             <span id="todayLabel">Hoy</span>
@@ -92,6 +131,7 @@
               </div>
               <h2>La clase no termina<br>cuando cambia la ciudad.</h2>
               <p>Conecta con estudiantes de tu mismo programa, desde Reynosa hasta Monterrey, Culiacán y más.</p>
+              <div class="hero-actions"><button class="button primary chat-jump-button" type="button" id="jumpToChatsBtn">Abrir chat de grupo ↓</button><button class="button secondary" type="button" data-open-community-gather>Sala comunitaria en Gather ↗</button></div>
               <div class="hero-spark" aria-hidden="true">✦</div>
             </div>
 
@@ -140,7 +180,7 @@
       </main>
 
       <footer class="app-footer">
-        <span>InterTecmi · ConectaTecmi</span>
+        <span>InterTec · ConectaTec</span>
         <span>Comunidad estudiantil nacional</span>
       </footer>
     </div>
@@ -163,7 +203,7 @@
       <span class="mobile-tab-icon">05</span><span>Retos</span>
     </button>
     <button class="mobile-tab" role="tab" aria-selected="false" data-tab="campus-qualifier">
-      <span class="mobile-tab-icon">06</span><span>Proyectos</span>
+      <span class="mobile-tab-icon">06</span><span>Misiones</span>
     </button>
   </nav>
 
@@ -201,7 +241,7 @@
 
         <label class="field-label" for="chatClassInput">Relacionado con</label>
         <select class="select-input chat-create-select" id="chatClassInput">
-          <option value="General">General · Comunidad InterTecmi</option>
+          <option value="General">General · Comunidad InterTec</option>
         </select>
 
         <label class="field-label" for="chatDescriptionInput">Descripción <span class="field-helper">opcional</span></label>
@@ -284,7 +324,7 @@
         <div class="form-step" data-step="3">
           <div class="step-heading">
             <span class="step-kicker">03 · TU RITMO</span>
-            <h3>¿Qué tipo de reto te inspira?</h3>
+            <h3>¿Qué tipo de reto te prende?</h3>
           </div>
 
           <fieldset class="chip-fieldset">
@@ -311,6 +351,27 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Evidencia de misión: demo local -->
+  <div class="modal-backdrop" id="missionModal" hidden>
+    <div class="modal-card mission-modal-card" role="dialog" aria-modal="true" aria-labelledby="missionModalTitle">
+      <button class="modal-close" type="button" data-close-mission aria-label="Cerrar">×</button>
+      <p class="eyebrow">EVIDENCIA DE MISIÓN</p>
+      <h2 id="missionModalTitle">Completa tu misión</h2>
+      <p id="missionModalDesc">Sube una foto o video como evidencia.</p>
+      <label class="mission-upload">
+        <span class="mission-upload-icon">＋</span><strong>Seleccionar foto o video</strong>
+        <small>JPG, PNG, WEBP o MP4 · hasta 20 MB</small>
+        <input id="missionEvidenceInput" type="file" accept="image/*,video/mp4,video/webm" />
+      </label>
+      <p id="missionEvidenceName" class="mission-evidence-name">Ningún archivo seleccionado</p>
+      <div class="modal-actions">
+        <button class="button subtle" type="button" data-close-mission>Cancelar</button>
+        <button class="button primary" type="button" id="submitMissionEvidence" disabled>Enviar evidencia</button>
+      </div>
+      <p class="mission-demo-note">Prototipo: la evidencia se simula localmente y no se publica ni se sube a un servidor.</p>
     </div>
   </div>
 

@@ -1,7 +1,14 @@
 (() => {
   "use strict";
 
-  const GATHER_DEFAULT_URL = "https://app.v2.gather.town/app/25e4f4c4-31fa-4e91-8bfa-9241fb67b2f7/invite/b8b2a073-e6de-4f6f-b4a6-a5e68f04ffa7?copysource=inviteTeamModal";
+  // URL de Gather disponible en el prototipo. Sustituir por enlaces específicos
+  // cuando se tengan los enlaces de las aulas FLEX y de la sala comunitaria.
+  const GATHER_DEFAULT_URL = "https://app.v2.gather.town/app/76400ece-7e37-46b4-b42a-33bfd782d8bb/invite/134174b0-5c9c-47bd-b441-a19a5818b353?copysource=inviteTeamModal";
+  const GATHER_FLEX_URL = GATHER_DEFAULT_URL;
+  const GATHER_COMMUNITY_URL = GATHER_DEFAULT_URL;
+  const ACCESS_STORAGE_KEY = "intertec-student-access-v1";
+  let studentAccess = null;
+  let currentGatherType = "flex";
 
   const catalog = {
     campus: [
@@ -29,7 +36,7 @@
   };
 
   const fraternities = [
-    { name: "Lobos", color: "#2E6E9E", members: 142, cities: 6, careers: 4, points: 1840, icon: "◒", desc: "Energía de altura, estrategia y comunidad entre campus.", image: "https://images.unsplash.com/photo-1715002383611-63488b956401?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Águila en primer plano" },
+    { name: "Cóndores", color: "#2E6E9E", members: 142, cities: 6, careers: 4, points: 1840, icon: "◒", desc: "Energía de altura, estrategia y comunidad entre campus.", image: "https://images.unsplash.com/photo-1715002383611-63488b956401?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Águila en primer plano" },
     { name: "Jaguares", color: "#B8860B", members: 158, cities: 7, careers: 5, points: 1968, icon: "J", desc: "Intensidad, curiosidad y ganas de hacer que pasen cosas.", image: "https://images.unsplash.com/photo-1528238344097-a8994f7c74e4?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Jaguar en primer plano" },
     { name: "Quetzales", color: "#1B7A56", members: 121, cities: 5, careers: 3, points: 1764, icon: "Q", desc: "Creatividad, colaboración y un toque de exploración.", image: "https://images.unsplash.com/photo-1558254588-ee173c5dd703?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Quetzal verde sobre una rama" },
     { name: "Coyotes", color: "#C7451F", members: 137, cities: 6, careers: 4, points: 1821, icon: "C", desc: "Ingenio, adaptabilidad y comunidad que se mueve contigo.", image: "https://images.unsplash.com/photo-1493911324503-e5c8bf9df181?auto=format&fit=crop&fm=jpg&q=82&w=1000", imageAlt: "Coyote caminando en un paisaje árido" },
@@ -72,10 +79,46 @@
   const campusScores = Object.fromEntries(campusScoresSeed.map(([campus, score]) => [campus, score]));
   const challengeCompleted = new Set();
   const projectVotes = new Map(projectData.map((p, i) => [i, p.votes]));
+  const viralMissions = [
+    { id: "selfie-colores", title: "Selfie con los colores de tu fraternidad", desc: "Arma una selfie creativa donde aparezcan los colores de tu equipo. Puede ser ropa, accesorios o un fondo.", tag: "Selfie", points: 40, media: "image", trend: "https://www.google.com/search?q=site%3Atiktok.com+fraternity+color+selfie+challenge", trendLabel: "Ver ideas de selfies" },
+    { id: "baile-viral", title: "Recrea un baile viral", desc: "Graba un video corto recreando un baile viral. Invita a otra persona de tu fraternidad para sumar energía al reto.", tag: "Video", points: 80, media: "video", trend: "https://www.google.com/search?q=site%3Atiktok.com+viral+dance+challenge+2026", trendLabel: "Ver bailes en TikTok" },
+    { id: "pose-mascota", title: "Imita la pose de la mascota", desc: "Tómate una foto imitando la pose o actitud de la mascota de tu fraternidad, sin poner en riesgo tu seguridad.", tag: "Foto creativa", points: 50, media: "image", trend: "https://www.google.com/search?q=site%3Atiktok.com+mascot+pose+challenge", trendLabel: "Ver poses creativas" },
+    { id: "transicion-campus", title: "Transición multicampus", desc: "Haz una transición en video con alguien de otro campus: comiencen en lugares distintos y terminen con una pose coordinada.", tag: "Multicampus", points: 100, media: "video", trend: "https://www.google.com/search?q=site%3Atiktok.com+match+cut+transition+trend", trendLabel: "Ver transiciones" },
+    { id: "selfie-equipo", title: "Selfie de escuadrón", desc: "Reúne a tres integrantes de tu fraternidad en una selfie que represente su espíritu de equipo.", tag: "En equipo", points: 60, media: "image", trend: "https://www.google.com/search?q=site%3Atiktok.com+college+friends+group+photo+trend", trendLabel: "Ver retos grupales" },
+    { id: "trend-creativo", title: "Adapta un trend a la vida universitaria", desc: "Recrea un trend popular con una versión original sobre la vida en tu campus. Respeta la privacidad y pide permiso a quienes aparezcan.", tag: "Trend", points: 70, media: "video", trend: "https://www.google.com/search?q=site%3Atiktok.com+college+life+trend", trendLabel: "Ver trends universitarios" }
+  ];
+  const viralMissionsCompleted = new Set();
+  let activeMissionId = null;
 
   let currentTab = "classes";
   let profile = null;
   let currentStep = 1;
+  const STORAGE_KEY = "intertec-prototype-state-v1";
+  function loadSavedState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (!saved || typeof saved !== "object") return;
+      if (saved.profile && typeof saved.profile.name === "string") profile = saved.profile;
+      if (typeof saved.profilePhoto === "string") profilePhoto = saved.profilePhoto;
+      if (Array.isArray(saved.connectedProfiles)) saved.connectedProfiles.forEach(id => connectedProfiles.add(id));
+      if (Array.isArray(saved.viralMissionsCompleted)) saved.viralMissionsCompleted.forEach(id => viralMissionsCompleted.add(id));
+      if (Array.isArray(saved.challengeCompleted)) saved.challengeCompleted.forEach(id => challengeCompleted.add(id));
+      if (Array.isArray(saved.classChats) && saved.classChats.length) {
+        classChats.splice(0, classChats.length, ...saved.classChats);
+        activeChatId = saved.activeChatId || classChats[0].id;
+      }
+      if (saved.matchRevealed) { matchRevealed = true; matchStarted = false; }
+    } catch (error) { console.warn("InterTec: no se pudo recuperar el estado guardado.", error); }
+  }
+  function persistState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        profile, profilePhoto, connectedProfiles: [...connectedProfiles],
+        viralMissionsCompleted: [...viralMissionsCompleted], challengeCompleted: [...challengeCompleted],
+        classChats, activeChatId, matchRevealed
+      }));
+    } catch (error) { console.warn("InterTec: no se pudo guardar el estado local.", error); }
+  }
   let matchRevealed = false;
   let matchStarted = false;
   let profileModalReturnFocus = null;
@@ -137,6 +180,7 @@
   let chatCreateReturnFocus = null;
 
   let deadlineTarget = Date.now() + (((3 * 24) + 14) * 60 * 60 * 1000);
+  loadSavedState();
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -145,9 +189,11 @@
     // Cada módulo se inicia de forma independiente para que un fallo visual
     // no deje toda la interfaz inutilizable.
     const steps = [
+      ["acceso de alumno", initAccessGate],
       ["fecha", renderDate],
       ["navegación", initNavigation],
       ["modales", initModalControls],
+      ["evidencias de misiones", initMissionModal],
       ["formulario", initProfileForm],
       ["clases", renderClasses],
       ["chats", renderClassChats],
@@ -155,14 +201,14 @@
       ["fraternidad", renderFraternity],
       ["comunidad", renderCommunity],
       ["retos", renderFraternityQualifier],
-      ["proyectos", renderCampusQualifier],
+      ["misiones", renderCampusQualifier],
       ["contadores", startCountdowns],
       ["animaciones", observeRevealables]
     ];
     steps.forEach(([name, fn]) => {
       try { fn(); }
       catch (error) {
-        console.error(`InterTecmi · módulo ${name}:`, error);
+        console.error(`InterTec · módulo ${name}:`, error);
       }
     });
   }
@@ -171,6 +217,98 @@
     document.addEventListener("DOMContentLoaded", boot, { once: true });
   } else {
     boot();
+  }
+
+  function initAccessGate() {
+    const gate = $("#accessGate");
+    const app = $("#appShell");
+    const mobileTabs = $(".mobile-tabs");
+    try {
+      const saved = JSON.parse(localStorage.getItem(ACCESS_STORAGE_KEY) || "null");
+      if (saved && ["flex", "regular"].includes(saved.type)) studentAccess = saved;
+    } catch (_) {}
+    const radios = $$('input[name="studentType"]');
+    radios.forEach(radio => radio.addEventListener("change", updateAccessFields));
+    $("#accessForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const type = $('input[name="studentType"]:checked')?.value || "regular";
+      const className = $("#flexClassSelect").value;
+      const enrollment = $("#flexEnrollment").value.trim().toUpperCase();
+      const error = $("#accessError");
+      if (type === "flex" && !className) {
+        error.textContent = "Selecciona la clase FLEX a la que perteneces.";
+        error.hidden = false;
+        $("#flexClassSelect").focus();
+        return;
+      }
+      if (type === "flex" && !/^AL\d{8}$/.test(enrollment)) {
+        error.textContent = "Escribe tu matrícula con el formato AL seguido de 8 dígitos. Ejemplo: AL07209922.";
+        error.hidden = false;
+        $("#flexEnrollment").focus();
+        return;
+      }
+      studentAccess = { type, className: type === "flex" ? className : "", enrollment: type === "flex" ? enrollment : "" };
+      try { localStorage.setItem(ACCESS_STORAGE_KEY, JSON.stringify(studentAccess)); } catch (_) {}
+      applyAccess();
+      gate.hidden = true;
+      app.hidden = false;
+      if (mobileTabs) mobileTabs.hidden = false;
+      renderClasses();
+      renderDate();
+      toast(type === "flex" ? `Acceso FLEX configurado: ${className}.` : "Acceso de alumno regular configurado.");
+    });
+    $("#changeAccessBtn")?.addEventListener("click", showAccessGate);
+    document.addEventListener("click", event => {
+      const communityButton = event.target.closest("[data-open-community-gather]");
+      if (communityButton) openGather("Sala comunitaria", communityButton, "community");
+    });
+    if (studentAccess) {
+      $("#accessFlex").checked = studentAccess.type === "flex";
+      $("#accessRegular").checked = studentAccess.type === "regular";
+      if (studentAccess.className) $("#flexClassSelect").value = studentAccess.className;
+      if (studentAccess.enrollment) $("#flexEnrollment").value = studentAccess.enrollment;
+      gate.hidden = true;
+      app.hidden = false;
+      if (mobileTabs) mobileTabs.hidden = false;
+      applyAccess();
+    } else {
+      app.hidden = true;
+      if (mobileTabs) mobileTabs.hidden = true;
+      gate.hidden = false;
+    }
+    updateAccessFields();
+  }
+
+  function updateAccessFields() {
+    const type = $('input[name="studentType"]:checked')?.value || "regular";
+    const flex = type === "flex";
+    $("#flexAccessFields").hidden = !flex;
+    $("#flexClassSelect").required = flex;
+    $("#flexEnrollment").required = flex;
+    $("#accessError").hidden = true;
+  }
+
+  function showAccessGate() {
+    $("#accessGate").hidden = false;
+    $("#appShell").hidden = true;
+    $(".mobile-tabs").hidden = true;
+    if (studentAccess) {
+      $("#accessFlex").checked = studentAccess.type === "flex";
+      $("#accessRegular").checked = studentAccess.type === "regular";
+      $("#flexClassSelect").value = studentAccess.className || "";
+      $("#flexEnrollment").value = studentAccess.enrollment || "";
+      updateAccessFields();
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function applyAccess() {
+    const badge = $("#studentBadge");
+    if (badge && studentAccess) {
+      const accessLabel = studentAccess.type === "flex" ? `FLEX · ${studentAccess.className}` : "Alumno regular";
+      badge.title = accessLabel;
+      badge.setAttribute("aria-label", accessLabel);
+    }
   }
 
   function renderDate() {
@@ -204,8 +342,41 @@
         </div>
       </article>`).join("");
 
-    $$("#classesGrid [data-gather]").forEach(btn => btn.addEventListener("click", () => openGather(btn.dataset.gather, btn)));
+    $$("#classesGrid [data-gather]").forEach(btn => btn.addEventListener("click", () => openGather(btn.dataset.gather, btn, "flex")));
+    const jumpToChats = $("#jumpToChatsBtn");
+    if (jumpToChats) jumpToChats.addEventListener("click", () => {
+      const chats = $("#classChats");
+      chats?.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.setTimeout(() => $("#chatMessageInput")?.focus({ preventScroll: true }), 450);
+    });
+    $$("#classesGrid [data-gather]").forEach(btn => {
+      const isRegular = studentAccess?.type !== "flex";
+      const isOtherFlexClass = studentAccess?.type === "flex" && studentAccess.className !== btn.dataset.gather;
+      if (isRegular || isOtherFlexClass) {
+        btn.disabled = true;
+        btn.textContent = isRegular ? "Solo alumnos FLEX" : "Otra clase FLEX";
+        btn.classList.remove("primary");
+        btn.classList.add("secondary");
+        btn.setAttribute("aria-label", isRegular ? "Acceso a clase FLEX restringido para alumnos regulares" : "Esta no es la clase FLEX seleccionada en el acceso");
+      }
+    });
     renderClassChats();
+  }
+
+  function initMissionModal() {
+    const input=$("#missionEvidenceInput");
+    if(input) input.addEventListener("change",()=>{
+      const file=input.files&&input.files[0];
+      const validType=file&&(file.type.startsWith("image/")||file.type==="video/mp4"||file.type==="video/webm");
+      const validSize=file&&file.size<=20*1024*1024;
+      $("#missionEvidenceName").textContent=file?file.name:"Ningún archivo seleccionado";
+      $("#submitMissionEvidence").disabled=!(validType&&validSize);
+      if(file&&!validType) toast("Selecciona una imagen o video MP4/WebM.");
+      if(file&&validType&&!validSize) toast("El archivo debe pesar 20 MB o menos.");
+    });
+    $$('[data-close-mission]').forEach(button=>button.addEventListener('click',closeMissionModal));
+    $("#missionModal").addEventListener("click",event=>{if(event.target.id==="missionModal") closeMissionModal();});
+    $("#submitMissionEvidence").addEventListener("click",submitMissionEvidence);
   }
 
   function initNavigation() {
@@ -223,7 +394,7 @@
       fraternity: ["MATCHING", "Mi Fraternidad"],
       community: ["RED MULTICAMPUS", "Comunidad"],
       "fraternity-qualifier": ["VIVE OLIMPIADAS", "Clasificatoria Fraternidades"],
-      "campus-qualifier": ["COPA DE PROYECTOS", "Clasificatoria Intracampus"]
+      "campus-qualifier": ["MISIÓN DE FRATERNIDAD", "Misiones y puntos"]
     };
 
     allowed.forEach(name => {
@@ -244,9 +415,20 @@
     $("#sectionTitle").textContent = meta[tab][1];
 
     if (tab === "fraternity" && profile && !matchRevealed && !matchStarted) runMatch();
+    if (tab === "campus-qualifier") renderCampusQualifier();
   }
 
-  function openGather(subject, trigger = null) {
+  function openGather(subject, trigger = null, type = "flex") {
+    if (!studentAccess) {
+      showAccessGate();
+      toast("Elige tu tipo de alumno para continuar.");
+      return;
+    }
+    if (type === "flex" && studentAccess.type !== "flex") {
+      toast("Las aulas FLEX están disponibles únicamente para alumnos FLEX.");
+      return;
+    }
+    currentGatherType = type;
     const modal = $("#gatherModal");
     gatherModalReturnFocus = trigger || document.activeElement;
     clearTimeout(gatherTimer);
@@ -263,7 +445,9 @@
 
     gatherTimer = window.setTimeout(() => {
       $("#gatherTitle").textContent = "Conectado.";
-      $("#gatherText").textContent = "Tu aula multicampus está lista. Este prototipo usa el espacio Gather predeterminado.";
+      $("#gatherText").textContent = currentGatherType === "flex"
+        ? `Tu aula FLEX de ${studentAccess?.className || subject} está lista. En este prototipo aún se utiliza el enlace Gather configurado por defecto.`
+        : "La sala comunitaria está lista. En este prototipo aún se utiliza el enlace Gather configurado por defecto.";
       $("#connectedBadge").hidden = false;
       $("#gatherDone").hidden = false;
       $("#gatherDone").textContent = "Entrar a Gather ↗";
@@ -304,13 +488,38 @@
 
     $("#gatherDone").addEventListener("click", () => {
       closeModal($("#gatherModal"));
-      window.open(GATHER_DEFAULT_URL, "_blank", "noopener,noreferrer");
-      toast("Abriendo el espacio Gather predeterminado.");
+      const targetUrl = currentGatherType === "community" ? GATHER_COMMUNITY_URL : GATHER_FLEX_URL;
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
+      toast(currentGatherType === "community" ? "Abriendo la sala comunitaria." : "Abriendo tu aula FLEX.");
     });
 
-    $("#chatCreateForm").addEventListener("submit", event => {
-      event.preventDefault();
-      createChat();
+    // Delegación centralizada: los formularios de chat se vuelven a dibujar
+    // dinámicamente, así que sus eventos se controlan desde document.
+    document.addEventListener("submit", event => {
+      if (event.target.id === "chatComposer") {
+        event.preventDefault();
+        event.stopPropagation();
+        sendChatMessage(event.target);
+      } else if (event.target.id === "chatCreateForm") {
+        event.preventDefault();
+        event.stopPropagation();
+        createChat();
+      }
+    }, true);
+
+    document.addEventListener("click", event => {
+      const openChat = event.target.closest("[data-open-chat]");
+      if (openChat) {
+        event.preventDefault();
+        activeChatId = openChat.dataset.openChat;
+        renderClassChats();
+        persistState();
+        return;
+      }
+      if (event.target.closest("#createChatBtn")) {
+        event.preventDefault();
+        openCreateChatModal(event.target.closest("#createChatBtn"));
+      }
     });
   }
 
@@ -335,7 +544,7 @@
           <div>
             <p class="eyebrow">CHAT DE CLASE</p>
             <h2>Habla con tu equipo antes, durante y después del aula.</h2>
-            <p>Los grupos pueden nacer desde una clase, un proyecto o una idea. Crea los tuyos y mantén la conversación dentro de InterTecmi.</p>
+            <p>Los grupos pueden nacer desde una clase, un proyecto o una idea. Crea los tuyos y mantén la conversación dentro de InterTec.</p>
           </div>
           <button class="button primary" type="button" id="createChatBtn">+ Crear chat</button>
         </div>
@@ -367,22 +576,8 @@
         </div>
       </section>`;
 
-    $("#chatCreateBtn").addEventListener("click", openCreateChatModal);
-    $$('[data-open-chat]').forEach(button => button.addEventListener("click", () => {
-      activeChatId = button.dataset.openChat;
-      renderClassChats();
-    }));
-    $("#chatComposer").addEventListener("submit", event => {
-      event.preventDefault();
-      const input = $("#chatMessageInput");
-      const message = input.value.trim();
-      if (!message) return;
-      const current = classChats.find(chat => chat.id === activeChatId);
-      if (!current) return;
-      current.messages.push({ author: profile?.name || "Tú", time: new Date().toLocaleTimeString("es-MX", { hour: "numeric", minute: "2-digit" }), text: message });
-      renderClassChats();
-      window.setTimeout(() => $("#chatMessageInput")?.focus(), 0);
-    });
+    // Los clicks y envíos se atienden mediante delegación en initModalControls,
+    // para que sigan funcionando después de cada render dinámico.
 
     const classSelect = $("#chatClassInput");
     if (classSelect && !classSelect.dataset.hydrated) {
@@ -391,13 +586,35 @@
     }
   }
 
+  function sendChatMessage(form) {
+    const input = $("#chatMessageInput", form);
+    const message = input?.value.trim();
+    if (!message) {
+      input?.focus();
+      return;
+    }
+    const current = classChats.find(chat => chat.id === activeChatId);
+    if (!current) {
+      toast("Selecciona un chat para enviar tu mensaje.");
+      return;
+    }
+    current.messages.push({
+      author: profile?.name || "Tú",
+      time: new Date().toLocaleTimeString("es-MX", { hour: "numeric", minute: "2-digit" }),
+      text: message
+    });
+    renderClassChats();
+    persistState();
+    window.setTimeout(() => $("#chatMessageInput")?.focus(), 0);
+  }
+
   function openCreateChatModal(trigger = null) {
     chatCreateReturnFocus = trigger || document.activeElement;
     const modal = $("#chatCreateModal");
     $("#chatCreateForm").reset();
     $("#chatCreateError").textContent = "";
     const classSelect = $("#chatClassInput");
-    classSelect.innerHTML = `<option value="General">General · Comunidad InterTecmi</option>` + classData.map(item => `<option value="${escapeAttr(item.subject)}">${escapeHtml(item.subject)}</option>`).join("");
+    classSelect.innerHTML = `<option value="General">General · Comunidad InterTec</option>` + classData.map(item => `<option value="${escapeAttr(item.subject)}">${escapeHtml(item.subject)}</option>`).join("");
     modal.hidden = false;
     document.body.classList.add("modal-open");
     window.setTimeout(() => $("#chatNameInput")?.focus(), 30);
@@ -406,7 +623,7 @@
   function createChat() {
     const name = $("#chatNameInput").value.trim();
     const relatedTo = $("#chatClassInput").value;
-    const description = $("#chatDescriptionInput").value.trim() || "Chat creado desde InterTecmi para organizar ideas y tareas.";
+    const description = $("#chatDescriptionInput").value.trim() || "Chat creado desde InterTec para organizar ideas y tareas.";
     if (!name) {
       $("#chatCreateError").textContent = "Escribe un nombre para el chat.";
       return;
@@ -423,6 +640,7 @@
     activeChatId = id;
     closeModal($("#chatCreateModal"));
     renderClassChats();
+    persistState();
     toast(`Chat “${name}” creado.`);
   }
 
@@ -435,7 +653,7 @@
             <div class="empty-art" aria-hidden="true">IT</div>
             <p class="eyebrow">TU ESPACIO EN LA RED</p>
             <h2>Aquí todavía<br>no hay perfil.</h2>
-            <p>Crea una ficha rápida para que InterTecmi entienda tu campus, tu carrera y tus afinidades. Después podremos conectarte con tu fraternidad.</p>
+            <p>Crea una ficha rápida para que InterTec entienda tu campus, tu carrera y tus afinidades. Después podremos conectarte con tu fraternidad.</p>
             <button class="button primary" type="button" id="createProfileBtn">Crear mi perfil ✦</button>
           </div>
         </div>`;
@@ -636,7 +854,9 @@
     renderFraternity();
     renderCommunity();
     renderFraternityQualifier();
+    renderCampusQualifier();
     updateHeaderIdentity();
+    persistState();
 
     switchTab("fraternity");
     runMatch();
@@ -669,9 +889,10 @@
       <div class="community-layout">
         <section class="community-hero dark-block">
           <div>
-            <p class="eyebrow" style="color:var(--acid)">RED InterTecmi</p>
+            <p class="eyebrow" style="color:var(--acid)">RED INTERTEC</p>
             <h2>No importa tu campus.<br>Encuentra a tu gente.</h2>
             <p>Descubre estudiantes por intereses, carreras, certificados y ciudades. Conecta primero; la comunidad sucede después.</p>
+            <button class="button primary" type="button" data-open-community-gather>Entrar a sala comunitaria en Gather ↗</button>
           </div>
           <div class="community-hero-art" aria-hidden="true"><span>◎</span><span>✦</span><span>◌</span></div>
         </section>
@@ -712,7 +933,7 @@
         </section>
 
         <section class="photo-wall-section">
-          <div class="section-intro"><div><p class="eyebrow">MI GALERÍA</p><h2>Comparte momentos de tu vida InterTecmi</h2></div><label class="button primary upload-button">+ Añadir fotos<input id="galleryInput" type="file" accept="image/*" multiple hidden></label></div>
+          <div class="section-intro"><div><p class="eyebrow">MI GALERÍA</p><h2>Comparte momentos de tu vida InterTec</h2></div><label class="button primary upload-button">+ Añadir fotos<input id="galleryInput" type="file" accept="image/*" multiple hidden></label></div>
           <div class="photo-wall" id="photoWall">
             ${galleryPhotos.length ? galleryPhotos.map((src,index)=>`<figure class="user-photo"><img src="${escapeAttr(src)}" alt="Foto de mi galería ${index+1}"><button type="button" class="photo-remove" data-remove-photo="${index}" aria-label="Eliminar foto">×</button></figure>`).join("") : `<div class="photo-empty"><span>✦</span><strong>Tu galería está esperando historias.</strong><p>Sube fotos de clases, proyectos, eventos, viajes o retos multicampus.</p></div>`}
           </div>
@@ -727,16 +948,26 @@
       if(connectedProfiles.has(id)){ connectedProfiles.delete(id); toast("Conexión eliminada."); }
       else { connectedProfiles.add(id); const person=communityProfiles.find(p=>p.id===id); toast(`Conexión enviada a ${person ? person.name : "este perfil"}.`); }
       renderCommunity();
+      persistState();
     }));
     $$('[data-remove-photo]').forEach(btn=>btn.addEventListener("click",()=>{ galleryPhotos.splice(Number(btn.dataset.removePhoto),1); renderCommunity(); }));
   }
 
   function handleProfilePhoto(event) {
-    const file=event.target.files?.[0];
-    if(!file || !file.type.startsWith("image/")){ toast("Selecciona una imagen válida."); return; }
-    if(file.size>5*1024*1024){ toast("La foto de perfil debe pesar menos de 5 MB."); return; }
-    profilePhoto=URL.createObjectURL(file);
-    renderCommunity(); updateHeaderIdentity(); toast("Foto de perfil actualizada.");
+    const file = event.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) { toast("Selecciona una imagen válida."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast("La foto de perfil debe pesar menos de 5 MB."); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      profilePhoto = String(reader.result || "");
+      renderCommunity();
+      renderProfile();
+      updateHeaderIdentity();
+      persistState();
+      toast("Foto de perfil actualizada.");
+    };
+    reader.onerror = () => toast("No se pudo leer la foto. Intenta con otra imagen.");
+    reader.readAsDataURL(file);
   }
 
   function handleGalleryUpload(event) {
@@ -774,7 +1005,7 @@
             <div>
               <div class="scanner"><div class="scanner-core">IT</div></div>
               <div class="matching-copy">
-                <p class="eyebrow">ALGORITMO InterTecmi</p>
+                <p class="eyebrow">ALGORITMO INTERTEC</p>
                 <h3>${matchStarted ? "Calculando tu match..." : "Preparando tu match..."}</h3>
                 <p>Conectamos tus señales con perfiles, carreras y campus compatibles.</p>
               </div>
@@ -848,6 +1079,8 @@
     renderFraternity();
     renderCommunity();
     renderFraternityQualifier();
+    renderCampusQualifier();
+    persistState();
   }
 
   function createConfetti(baseColor) {
@@ -890,7 +1123,8 @@
     const total = fraternityChallenges.length;
     const done = challengeCompleted.size;
     const progress = Math.round((done / total) * 100);
-    const scores = fraternities.map(f => ({ ...f, livePoints: f.points + (f.name === winner.name ? [...challengeCompleted].reduce((sum, id) => sum + (fraternityChallenges.find(c => c.id === id)?.points || 0), 0) : 0) }));
+    const viralPoints = viralMissions.filter(m => viralMissionsCompleted.has(m.id)).reduce((sum, m) => sum + m.points, 0);
+    const scores = fraternities.map(f => ({ ...f, livePoints: f.points + (f.name === winner.name ? viralPoints + [...challengeCompleted].reduce((sum, id) => sum + (fraternityChallenges.find(c => c.id === id)?.points || 0), 0) : 0) }));
 
     root.innerHTML = `
       <div class="qualifier-hero">
@@ -939,6 +1173,7 @@
       const id = button.dataset.reto;
       challengeCompleted.add(id);
       renderFraternityQualifier();
+      persistState();
       toast("¡Reto completado! Tu fraternidad sumó puntos.");
     }));
     animateCounters();
@@ -946,85 +1181,61 @@
 
   function renderCampusQualifier() {
     const root = $("#campusQualifierView");
-    const filtered = projectData.filter(project => (campusFilter === "Todos" || project.campus === campusFilter) && (careerFilter === "Todas" || project.career === careerFilter));
-
-    const topPerCareer = {};
-    projectData.forEach(project => {
-      if (!topPerCareer[project.career] || project.score > topPerCareer[project.career].score) topPerCareer[project.career] = project;
-    });
-
+    if (!profile) {
+      root.innerHTML = `
+        <div class="dark-section"><div class="match-lock"><div class="blocker-icon">06</div><div>
+          <p class="eyebrow" style="color:var(--acid)">MISIONES DE FRATERNIDAD</p><h2>Tu equipo te necesita.</h2>
+          <p>Completa tu perfil para descubrir tu fraternidad y participar en misiones creativas que suman puntos para tu equipo.</p>
+          <button class="button primary" type="button" id="goProfileMissionBtn">Crear mi perfil</button>
+        </div></div></div>`;
+      $("#goProfileMissionBtn").addEventListener("click", () => { switchTab("profile"); openProfileModal($("#goProfileMissionBtn")); });
+      return;
+    }
+    const winner = fraternities[1];
+    const done = viralMissionsCompleted.size;
+    const pointsEarned = viralMissions.filter(m => viralMissionsCompleted.has(m.id)).reduce((sum, m) => sum + m.points, 0);
+    const progress = Math.round(done / viralMissions.length * 100);
+    const scores = fraternities.map(f => ({ ...f, livePoints: f.points + (f.name === winner.name ? pointsEarned : 0) })).sort((a,b) => b.livePoints-a.livePoints);
     root.innerHTML = `
       <div class="qualifier-hero">
-        <div class="qualifier-hero-main">
-          <p class="eyebrow" style="color:var(--acid)">COPA DE PROYECTOS FINALES · INTRACAMPUS</p>
-          <h2>Cada campus<br>entra como un solo equipo.</h2>
-          <p>Cada sede presenta sus mejores proyectos finales. Después, dentro de cada carrera, se elige el proyecto que mejor representa a su campus y se compara contra las demás sedes.</p>
-          <div class="chip-list"><span class="sticker tilt-left">1 CAMPUS = 1 EQUIPO</span><span class="pill">Evaluación por carrera</span><span class="pill">Ranking nacional</span></div>
+        <div class="qualifier-hero-main"><p class="eyebrow" style="color:var(--acid)">MISIÓN DE FRATERNIDAD · PUNTOS POR PARTICIPAR</p>
+          <h2>Hazlo por el equipo.<br>Que se note tu espíritu.</h2>
+          <p>Completa selfies, bailes y retos creativos para sumar puntos a tu fraternidad. Comparte solo contenido con el que te sientas cómodo y pide permiso a quienes aparezcan.</p>
+          <div class="chip-list qualifier-identity"><span class="sticker tilt-left">TU EQUIPO · ${escapeHtml(winner.name.toUpperCase())}</span><span class="pill">${escapeHtml(profile.campuses[0])}</span><span class="pill">${escapeHtml(profile.certificate)}</span></div>
         </div>
-        <div class="qualifier-hero-side">
-          <p class="eyebrow">CATEGORÍAS ABIERTAS</p>
-          <div class="qualifier-kpi"><strong>${Object.keys(topPerCareer).length}</strong><span>carreras<br>representadas</span></div>
-          <p>La demo muestra proyectos de varias carreras y sedes. El catálogo puede crecer sin cambiar la estructura.</p>
+        <div class="qualifier-hero-side"><p class="eyebrow">TU MARCADOR</p><div class="qualifier-kpi"><strong>+${pointsEarned}</strong><span>puntos<br>ganados</span></div>
+          <div class="progress-small" style="margin-top:16px"><span style="width:${progress}%"></span></div><p><strong>${done}/${viralMissions.length}</strong> misiones completadas</p>
         </div>
       </div>
-
-      <div class="qualifier-section">
-        <div class="qualifier-section-head"><div><p class="eyebrow">FILTROS</p><h3>Explora la competencia</h3></div><span class="sticker tilt-right">${filtered.length} PROYECTOS</span></div>
-        <div class="filter-row">
-          <select class="select-input" id="campusFilter" aria-label="Filtrar por campus">
-            <option value="Todos">Todos los campus</option>${catalog.campus.map(c => `<option value="${escapeAttr(c)}" ${c===campusFilter ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
-          </select>
-          <select class="select-input" id="careerFilter" aria-label="Filtrar por carrera">
-            <option value="Todas">Todas las carreras</option>${catalog.careers.map(c => `<option value="${escapeAttr(c)}" ${c===careerFilter ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
-          </select>
-        </div>
+      <div class="qualifier-section"><div class="qualifier-section-head"><div><p class="eyebrow">MISIÓNATE</p><h3>Elige un reto y suma puntos</h3></div><span class="sticker tilt-right">+ PUNTOS PARA TU FRATERNIDAD</span></div>
+        <div class="qualifier-grid mission-grid">${viralMissions.map((mission,i)=>{
+          const isDone=viralMissionsCompleted.has(mission.id);
+          return `<article class="reto-card mission-card ${isDone?'mission-complete':''}"><div class="reto-top"><div class="reto-index">${String(i+1).padStart(2,'0')}</div><div class="reto-status">${isDone?'COMPLETADA':`+${mission.points} PTS`}</div></div>
+            <div class="mission-illustration ${mission.media==='video'?'is-video':'is-photo'}" aria-hidden="true"><span>${mission.media==='video'?'▶':'✦'}</span><small>${mission.media==='video'?'RETO EN VIDEO':'RETO EN FOTO'}</small></div>
+            <h4>${escapeHtml(mission.title)}</h4><p>${escapeHtml(mission.desc)}</p><div class="challenge-meta"><span class="pill">${escapeHtml(mission.tag)}</span><span class="pill">${mission.media==='video'?'Video':'Fotografía'}</span></div>
+            <a class="mission-trend-link" href="${escapeAttr(mission.trend)}" target="_blank" rel="noopener noreferrer">${escapeHtml(mission.trendLabel)} ↗</a>
+            <div class="reto-footer"><span class="points-label">${isDone?`+${mission.points} puntos sumados`:`Para ${escapeHtml(winner.name)}`}</span><button class="button ${isDone?'subtle':'primary'}" type="button" data-open-mission="${mission.id}" ${isDone?'disabled':''}>${isDone?'✓ Completada':'Subir evidencia'}</button></div></article>`;
+        }).join('')}</div>
       </div>
-
-      <div class="qualifier-section">
-        <div class="qualifier-section-head"><div><p class="eyebrow">PROYECTOS FINALISTAS</p><h3>Lo mejor de cada sede</h3></div></div>
-        <div class="qualifier-grid">
-          ${filtered.map((project, index) => renderProjectCard(project, projectData.indexOf(project), index === 0)).join("") || `<div class="panel-empty"><div class="empty-inner"><div class="empty-art">0</div><h2>Sin proyectos<br>en este filtro.</h2><p>Prueba otra combinación de campus y carrera.</p></div></div>`}
-        </div>
-      </div>
-
-      <div class="qualifier-section">
-        <div class="qualifier-section-head"><div><p class="eyebrow">CAMPEONATO POR CAMPUS</p><h3>Ranking de sedes</h3></div><span class="sticker tilt-right">TOP 16</span></div>
-        <div class="campus-score-grid">
-          ${Object.entries(campusScores).sort((a,b)=>b[1]-a[1]).map(([campus, score], i) => `
-            <article class="campus-score-card">
-              <div class="campus-score-top"><div><span class="project-badge">${String(i+1).padStart(2,'0')}</span></div><div style="text-align:right"><p style="font-weight:800">${escapeHtml(campus)}</p><strong style="font:800 1.35rem var(--display)">${score}</strong></div></div>
-              <div class="score-bar"><span style="width:${Math.min(score,100)}%"></span></div>
-              <p style="margin-top:8px">Puntaje agregado de los mejores proyectos de la sede.</p>
-            </article>`).join("")}
-        </div>
-      </div>
-
-      <div class="qualifier-section">
-        <div class="qualifier-section-head"><div><p class="eyebrow">MEJOR PROYECTO POR CARRERA</p><h3>Líderes de categoría</h3></div><span class="sticker tilt-right">FINAL</span></div>
-        <div class="qualifier-grid">
-          ${Object.values(topPerCareer).slice(0,6).map(project => renderProjectCard(project, projectData.indexOf(project), true, true)).join("")}
-        </div>
+      <div class="qualifier-section"><div class="qualifier-section-head"><div><p class="eyebrow">MARCADOR NACIONAL</p><h3>¿Quién va al frente?</h3></div><span class="sticker tilt-right">FRATERNIDADES</span></div>
+        <div class="qualifier-ranking">${scores.map((f,i)=>`<div class="qualifier-rank-row ${f.name===winner.name?'is-user':''}"><div class="rank-number">${i+1}</div><div class="team-rank-copy"><span class="team-mark"><img src="${escapeAttr(f.image)}" alt="" aria-hidden="true"></span><span class="rank-team-name">${escapeHtml(f.name)}${f.name===winner.name?' · TU EQUIPO':''}</span><span class="rank-team-sub">${f.members} miembros · ${f.cities} ciudades · ${f.careers} carreras</span></div><div class="rank-score">${f.livePoints.toLocaleString('es-MX')}</div></div>`).join('')}</div>
       </div>`;
-
-    $("#campusFilter").addEventListener("change", e => { campusFilter = e.target.value; renderCampusQualifier(); });
-    $("#careerFilter").addEventListener("change", e => { careerFilter = e.target.value; renderCampusQualifier(); });
-    $$('[data-vote-project]').forEach(btn => btn.addEventListener("click", () => {
-      const index = Number(btn.dataset.voteProject);
-      projectVotes.set(index, (projectVotes.get(index) || 0) + 1);
-      toast("Voto registrado para este proyecto.");
-      renderCampusQualifier();
-    }));
+    $$('[data-open-mission]').forEach(button=>button.addEventListener('click',()=>openMissionModal(button.dataset.openMission)));
   }
 
-  function renderProjectCard(project, index, featured = false, compact = false) {
-    const votes = projectVotes.get(index) || project.votes;
-    return `<article class="project-card ${featured ? "featured" : ""}">
-      <div class="project-top"><div class="project-badge">${campusCode(project.campus)}</div><span class="sticker ${featured ? "" : "tilt-right"}" style="${featured ? "background:var(--acid);color:var(--ink)" : ""}">${escapeHtml(project.status)}</span></div>
-      <h4>${escapeHtml(project.title)}</h4>
-      <p>${escapeHtml(project.desc)}</p>
-      <div class="project-meta"><span class="pill">${escapeHtml(project.campus)}</span><span class="pill">${escapeHtml(project.career)}</span><span class="pill">${escapeHtml(project.team)}</span></div>
-      <div class="project-vote-row"><span class="project-score">${project.score}/100 <small style="font-size:.65rem;font-weight:600">evaluación</small></span><button class="button ${featured ? "primary" : "secondary"}" type="button" data-vote-project="${index}">${compact ? "Votar ganador" : "Apoyar proyecto"} · ${votes}</button></div>
-    </article>`;
+  function openMissionModal(id) {
+    const mission=viralMissions.find(item=>item.id===id); if(!mission) return;
+    activeMissionId=id; $("#missionModalTitle").textContent=mission.title;
+    $("#missionModalDesc").textContent=`${mission.desc} Tu fraternidad recibirá ${mission.points} puntos al enviar la evidencia (simulación de prototipo).`;
+    $("#missionEvidenceInput").value=""; $("#missionEvidenceName").textContent="Ningún archivo seleccionado";
+    $("#submitMissionEvidence").disabled=true; $("#missionModal").hidden=false; document.body.classList.add("modal-open");
+    $("#missionEvidenceInput").focus();
+  }
+  function closeMissionModal() { $("#missionModal").hidden=true; document.body.classList.remove("modal-open"); activeMissionId=null; }
+  function submitMissionEvidence() {
+    if(!activeMissionId) return; const mission=viralMissions.find(item=>item.id===activeMissionId); if(!mission) return;
+    viralMissionsCompleted.add(mission.id); closeMissionModal(); renderCampusQualifier(); renderFraternityQualifier(); persistState();
+    toast(`¡Misión completada! +${mission.points} puntos para ${fraternities[1].name}.`);
   }
 
   function animateCounters() {
