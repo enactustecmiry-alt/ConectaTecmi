@@ -712,7 +712,36 @@
     renderChipGroup("#campusChips", catalog.campus, { single: true });
     renderChipGroup("#careerChips", catalog.careers, { single: true });
     renderChipGroup("#certificateChips", catalog.certificates, { single: true });
-    renderChipGroup("#interestChips", catalog.interests, { single: false });
+    // El certificado se ofrece después de elegir carrera y se filtra por afinidad académica.
+    const certificatesByCareer = {
+      "Administración de Empresas": ["Inteligencia de Mercados", "Criminología", "Turismo"],
+      "Comercio y Negocios Internacionales": ["Inteligencia de Mercados", "Turismo"],
+      "Contabilidad y Estrategia Financiera": ["Inteligencia de Mercados"],
+      "Derecho": ["Criminología"],
+      "Ingeniería en Desarrollo de Software": ["Inteligencia Artificial", "Diseño y Programación de Videojuegos", "Producción Multimedia y Animación"],
+      "Diseño Gráfico y Animación": ["Producción Multimedia y Animación", "Diseño y Programación de Videojuegos"],
+      "Enfermería": ["Criminología"],
+      "Gastronomía Internacional": ["Turismo"],
+      "Ingeniería Industrial": ["Automatización Industrial", "Inteligencia Artificial"],
+      "Ingeniería en Logística y Cadena de Suministro": ["Automatización Industrial", "Inteligencia de Mercados"],
+      "Ingeniería en Mecatrónica": ["Automatización Industrial", "Inteligencia Artificial", "Diseño y Programación de Videojuegos"],
+      "Mercadotecnia": ["Inteligencia de Mercados", "Producción Multimedia y Animación"],
+      "Nutrición": ["Criminología"],
+      "Psicología": ["Criminología", "Inteligencia de Mercados"]
+    };
+    const refreshCertificates = (career, preferred = "") => {
+      const options = certificatesByCareer[career] || catalog.certificates;
+      renderChipGroup("#certificateChips", options, { single: true });
+      if (preferred && options.includes(preferred)) selectValues("#certificateChips", [preferred]);
+      const legend = $("#certificateChips")?.closest("fieldset")?.querySelector("legend");
+      if (legend) legend.innerHTML = `Certificado <span class="field-helper">opciones sugeridas para tu carrera</span>`;
+    };
+    $("#careerChips").addEventListener("click", event => {
+      if (!event.target.closest("[data-value]")) return;
+      const selectedCareer = getSelected("#careerChips")[0];
+      const oldCertificate = getSelected("#certificateChips")[0] || "";
+      refreshCertificates(selectedCareer, oldCertificate);
+    });
     renderChipGroup("#groupChips", catalog.groups, { single: false });
     renderChallengeGroup();
 
@@ -773,6 +802,13 @@
     $("#nameInput").value = profile?.name || "";
     selectValues("#campusChips", profile?.campuses?.slice(0, 1) || []);
     selectValues("#careerChips", profile?.careers?.slice(0, 1) || []);
+    const savedCareer = profile?.careers?.[0] || getSelected("#careerChips")[0];
+    if (savedCareer) {
+      const certMap = {
+        "Administración de Empresas": ["Inteligencia de Mercados", "Criminología", "Turismo"], "Comercio y Negocios Internacionales": ["Inteligencia de Mercados", "Turismo"], "Contabilidad y Estrategia Financiera": ["Inteligencia de Mercados"], "Derecho": ["Criminología"], "Ingeniería en Desarrollo de Software": ["Inteligencia Artificial", "Diseño y Programación de Videojuegos", "Producción Multimedia y Animación"], "Diseño Gráfico y Animación": ["Producción Multimedia y Animación", "Diseño y Programación de Videojuegos"], "Enfermería": ["Criminología"], "Gastronomía Internacional": ["Turismo"], "Ingeniería Industrial": ["Automatización Industrial", "Inteligencia Artificial"], "Ingeniería en Logística y Cadena de Suministro": ["Automatización Industrial", "Inteligencia de Mercados"], "Ingeniería en Mecatrónica": ["Automatización Industrial", "Inteligencia Artificial", "Diseño y Programación de Videojuegos"], "Mercadotecnia": ["Inteligencia de Mercados", "Producción Multimedia y Animación"], "Nutrición": ["Criminología"], "Psicología": ["Criminología", "Inteligencia de Mercados"]
+      };
+      renderChipGroup("#certificateChips", certMap[savedCareer] || catalog.certificates, { single: true });
+    }
     selectValues("#certificateChips", profile?.certificate ? [profile.certificate] : []);
     selectValues("#interestChips", profile?.interests || []);
     selectValues("#groupChips", profile?.groups || []);
@@ -1046,6 +1082,10 @@
             <div class="profile-actions"><button class="button gold" type="button" id="joinFraternityBtn">Unirme a la fraternidad</button></div>
             <div class="ranking-section">
               <div class="ranking-head"><div><p class="eyebrow">VIVE OLIMPIADAS</p><h3>Marcador nacional</h3></div><span class="sticker tilt-right">TOP 5</span></div>
+              <div class="leaderboard-chart" role="img" aria-label="Gráfica de puntos por fraternidad. ${[...fraternities].sort((a,b)=>b.points-a.points).map(f=>`${f.name}: ${f.points} puntos`).join("; ")}">
+                <div class="leaderboard-chart-head"><span>Comparativa de puntos</span><small>PUNTOS TOTALES</small></div>
+                ${[...fraternities].sort((a,b)=>b.points-a.points).map((f,i)=>`<div class="leaderboard-bar-row"><div class="leaderboard-bar-label"><span>${i+1}. ${escapeHtml(f.name)}</span><strong>${f.points.toLocaleString("es-MX")}</strong></div><div class="leaderboard-bar-track"><span style="width:${Math.round(f.points/Math.max(...fraternities.map(team=>team.points))*100)}%;--bar-color:${f.color}"></span></div></div>`).join("")}
+              </div>
               <div class="ranking">${[...fraternities].sort((a,b) => b.points-a.points).map((f,i) => `
                 <div class="rank-item ${f.name === winner.name ? "is-user" : ""}">
                   <div class="rank-number">${i+1}</div>
@@ -1062,6 +1102,62 @@
       $("#joinFraternityBtn").textContent = "✓ Unido a la fraternidad";
       $("#joinFraternityBtn").disabled = true;
     });
+    // Explorador interactivo de todas las fraternidades (datos de miembros demostrativos).
+    const explorerMembers = {
+      "Cóndores": [
+        { name: "Alex Rivera", campus: "Monterrey", career: "Ingeniería", interests: "Estrategia · Tecnología" },
+        { name: "Sofía Méndez", campus: "Guadalajara", career: "Mercadotecnia", interests: "Fotografía · Liderazgo" },
+        { name: "Diego Torres", campus: "Reynosa", career: "Negocios", interests: "Deporte · Comunidad" }
+      ],
+      "Jaguares": [
+        { name: "Valeria Cruz", campus: "Reynosa", career: "Mercadotecnia", interests: "Videos · Música" },
+        { name: "Mateo Flores", campus: "Monterrey", career: "Ingeniería", interests: "Gaming · Tecnología" },
+        { name: "Camila Reyes", campus: "Guadalajara", career: "Psicología", interests: "Bienestar · Voluntariado" }
+      ],
+      "Quetzales": [
+        { name: "Emilia Soto", campus: "Puebla", career: "Diseño", interests: "Arte · Creatividad" },
+        { name: "Santiago León", campus: "Mérida", career: "Comunicación", interests: "Naturaleza · Video" },
+        { name: "Renata Gil", campus: "Monterrey", career: "Negocios", interests: "Innovación · Cultura" }
+      ],
+      "Coyotes": [
+        { name: "Daniela Ríos", campus: "Reynosa", career: "Negocios", interests: "Emprendimiento · Retos" },
+        { name: "Gael Navarro", campus: "Querétaro", career: "Ingeniería", interests: "Robótica · Deportes" },
+        { name: "Regina Luna", campus: "Guadalajara", career: "Comunicación", interests: "Música · Comunidad" }
+      ],
+      "Halcones": [
+        { name: "Andrea Campos", campus: "Monterrey", career: "Salud", interests: "Ciencia · Bienestar" },
+        { name: "Nicolás Vega", campus: "Puebla", career: "Ingeniería", interests: "Tecnología · Ajedrez" },
+        { name: "Mariana Solís", campus: "Mérida", career: "Mercadotecnia", interests: "Liderazgo · Fotografía" }
+      ]
+    };
+    const explorer = document.createElement("section");
+    explorer.className = "fraternity-explorer";
+    explorer.innerHTML = `
+      <div class="explorer-heading"><p class="eyebrow">EXPLORA LA COMUNIDAD</p><h3>Conoce las fraternidades</h3><p>Abre cada equipo para descubrir su identidad, características y algunos perfiles de ejemplo.</p></div>
+      <div class="fraternity-explorer-grid">${fraternities.map((f,i)=>`<button type="button" class="explorer-team ${f.name===winner.name?'is-selected':''}" data-explore-fraternity="${escapeAttr(f.name)}" style="--fraternity-color:${f.color}" aria-pressed="${f.name===winner.name}"><img src="${escapeAttr(f.image)}" alt=""/><span><strong>${escapeHtml(f.name)}</strong><small>${f.members} miembros · ${f.cities} ciudades</small></span><b aria-hidden="true">↗</b></button>`).join("")}</div>
+      <div class="fraternity-detail" id="fraternityDetail" aria-live="polite"></div>`;
+    root.appendChild(explorer);
+    function showFraternityDetail(name) {
+      const f = fraternities.find(item => item.name === name) || fraternities[0];
+      const members = explorerMembers[f.name] || [];
+      const detail = explorer.querySelector("#fraternityDetail");
+      detail.style.setProperty("--fraternity-color", f.color);
+      detail.innerHTML = `<div class="fraternity-detail-head"><img src="${escapeAttr(f.image)}" alt=""/><div><p class="eyebrow">PERFIL DE FRATERNIDAD</p><h4>${escapeHtml(f.name)}</h4><p>${escapeHtml(f.desc)}</p></div></div>
+        <div class="fraternity-detail-stats"><div><strong>${f.members}</strong><span>miembros registrados*</span></div><div><strong>${f.cities}</strong><span>ciudades</span></div><div><strong>${f.careers}</strong><span>áreas académicas</span></div><div><strong>${f.points.toLocaleString("es-MX")}</strong><span>puntos actuales</span></div></div>
+        <div class="fraternity-traits"><span>✦ ${f.name === "Cóndores" ? "Estrategia" : f.name === "Jaguares" ? "Iniciativa" : f.name === "Quetzales" ? "Creatividad" : f.name === "Coyotes" ? "Adaptabilidad" : "Visión"}</span><span>✦ Colaboración</span><span>✦ Espíritu multicampus</span></div>
+        <div class="member-list-heading"><h5>Miembros destacados</h5><span>Perfiles de demostración</span></div>
+        <div class="demo-member-grid">${members.map((m,i)=>`<article class="demo-member"><img class="demo-member-avatar" src="${["https://randomuser.me/api/portraits/women/44.jpg","https://randomuser.me/api/portraits/men/32.jpg","https://randomuser.me/api/portraits/women/68.jpg","https://randomuser.me/api/portraits/men/46.jpg","https://randomuser.me/api/portraits/women/21.jpg"][((fraternities.findIndex(team=>team.name===f.name)*3)+i)%5]}" alt="Foto de stock de perfil de demostración" loading="lazy"><div><strong>${escapeHtml(m.name)}</strong><span>${escapeHtml(m.career)}</span><small>${escapeHtml(m.campus)} · ${escapeHtml(m.interests)}</small></div></article>`).join("")}</div>
+        <p class="explorer-disclaimer">*Las cifras de equipo pertenecen al prototipo. Los perfiles mostrados son ejemplos ficticios para demostrar la navegación; no representan alumnos reales.</p>
+        <div class="explorer-pagination"><button type="button" class="button secondary" data-frat-step="-1">← Anterior</button><span>${fraternities.findIndex(item=>item.name===f.name)+1} de ${fraternities.length}</span><button type="button" class="button primary" data-frat-step="1">Siguiente →</button></div>`;
+      explorer.querySelectorAll("[data-explore-fraternity]").forEach(btn=>{const active=btn.dataset.exploreFraternity===f.name;btn.classList.toggle("is-selected",active);btn.setAttribute("aria-pressed",String(active));});
+    }
+    explorer.addEventListener("click", event => {
+      const teamButton = event.target.closest("[data-explore-fraternity]");
+      if (teamButton) { showFraternityDetail(teamButton.dataset.exploreFraternity); return; }
+      const stepButton = event.target.closest("[data-frat-step]");
+      if (stepButton) { const current = explorer.querySelector(".explorer-team.is-selected")?.dataset.exploreFraternity || winner.name; const index = fraternities.findIndex(f=>f.name===current); const next = (index + Number(stepButton.dataset.fratStep) + fraternities.length) % fraternities.length; showFraternityDetail(fraternities[next].name); }
+    });
+    showFraternityDetail(winner.name);
     updateDeadline();
     animateCounters();
     createConfetti(winner.color);
