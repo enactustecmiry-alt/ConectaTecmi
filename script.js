@@ -712,6 +712,9 @@
     renderChipGroup("#campusChips", catalog.campus, { single: true });
     renderChipGroup("#careerChips", catalog.careers, { single: true });
     renderChipGroup("#certificateChips", catalog.certificates, { single: true });
+    // Reinicializar gustos explícitamente: sin estos chips la validación del paso 2
+    // impedía continuar aunque el resto del formulario estuviera completo.
+    renderChipGroup("#interestChips", catalog.interests, { single: false });
     // El certificado se ofrece después de elegir carrera y se filtra por afinidad académica.
     const certificatesByCareer = {
       "Administración de Empresas": ["Inteligencia de Mercados", "Criminología", "Turismo"],
@@ -757,6 +760,10 @@
 
   function renderChipGroup(selector, items, options = {}) {
     const root = $(selector);
+    if (!root) {
+      console.warn(`No se encontró el contenedor de opciones: ${selector}`);
+      return;
+    }
     const single = Boolean(options.single);
     root.innerHTML = items.map(item => `<button class="chip" type="button" ${single ? 'data-single="true"' : 'data-multi="true"'} data-value="${escapeAttr(item)}" aria-pressed="false">${escapeHtml(item)}</button>`).join("");
 
